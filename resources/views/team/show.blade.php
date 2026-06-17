@@ -12,7 +12,7 @@
             <div class="flex flex-col gap-6">
                 <div class="relative rounded-2xl overflow-hidden border border-border">
                     @if($team->images && count($team->images) > 0)
-                        <img src="{{ $team->images[0] }}" alt="{{ $team->name }}" class="w-full h-96 object-cover" id="mainImage" />
+                        <img src="/storage/admin/{{ $team->images[0] }}" alt="{{ $team->name }}" class="w-full h-96 object-cover" id="mainImage" />
                     @else
                         <div class="w-full h-96 bg-muted flex items-center justify-center">
                             <iconify-icon icon="lucide:user" class="text-6xl text-muted-foreground"></iconify-icon>
@@ -24,7 +24,7 @@
                 @if($team->images && count($team->images) > 1)
                     <div class="flex gap-4 overflow-x-auto pb-2">
                         @foreach($team->images as $index => $image)
-                            <img src="{{ $image }}" 
+                            <img src="/storage/admin/{{ $image }}" 
                                  alt="缩略图 {{ $index + 1 }}" 
                                  class="w-20 h-20 rounded-lg border-2 border-transparent hover:border-primary cursor-pointer transition-all flex-shrink-0 object-cover" 
                                  onclick="document.getElementById('mainImage').src = '{{ $image }}'" />

@@ -28,7 +28,7 @@
                             <!-- 成员图片 -->
                             <div class="relative h-64 bg-muted overflow-hidden">
                                 @if($member->images && count($member->images) > 0)
-                                    <img src="{{ $member->images[0] }}" alt="{{ $member->name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                                    <img src="/storage/admin/{{ $member->images[0] }}" alt="{{ $member->name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                                 @else
                                     <div class="w-full h-full flex items-center justify-center">
                                         <iconify-icon icon="lucide:user" class="text-4xl text-muted-foreground"></iconify-icon>
