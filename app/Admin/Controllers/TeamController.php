@@ -32,7 +32,7 @@ class TeamController extends AdminController
         $grid->column('position', __('岗位职责'))->limit(30);
         $grid->column('images', __('图片'))->display(function ($images) {
             if (is_array($images) && !empty($images)) {
-                return '<img src="' . $images[0] . '" style="max-height: 40px;" />';
+                return '<img src="/storage/admin/' . $images[0] . '" style="max-height: 40px;" />';
             }
             return '-';
         });
