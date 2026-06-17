@@ -37,6 +37,8 @@ Route::get('/services/{id}', [ServiceController::class, 'show']);
 Route::get('/cases', [CaseController::class, 'index']);
 Route::get('/cases/{id}', [CaseController::class, 'show']);
 Route::get('/case-tags', [CaseTagController::class, 'index']);
+use App\Http\Controllers\Api\TeamController as ApiTeamController;
+
 Route::get('/case-tags/{id}', [CaseTagController::class, 'show']);
 Route::get('/advantages', [AdvantageController::class, 'index']);
 Route::get('/advantages/{id}', [AdvantageController::class, 'show']);
@@ -46,4 +48,11 @@ Route::get('/cta-sections', [CtaSectionController::class, 'index']);
 Route::get('/leads', [LeadController::class, 'index']);
 Route::post('/leads', [LeadController::class, 'store']);
 Route::get('/leads/{id}', [LeadController::class, 'show']);
+
+// Team API
+Route::get('/teams', [ApiTeamController::class, 'index']);
+Route::get('/teams/{id}', [ApiTeamController::class, 'show']);
+Route::post('/teams', [ApiTeamController::class, 'store']);
+Route::put('/teams/{id}', [ApiTeamController::class, 'update']);
+Route::delete('/teams/{id}', [ApiTeamController::class, 'destroy']);
 

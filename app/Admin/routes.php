@@ -31,5 +31,8 @@ Route::group([
     $router->resource('cta-sections', 'CtaSectionController');//CTA行动区
     $router->resource('leads', 'LeadController');//客户线索
 
+    // 团队管理
+    $router->resource('teams', 'TeamController');//团队管理
+
 });
  

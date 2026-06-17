@@ -183,7 +183,7 @@
                     <div class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mb-6">
                         <iconify-icon icon="{{ $advantage->icon ?? 'lucide:zap' }}" class="text-primary text-3xl"></iconify-icon>
                     </div>
-                    <h4 class="font-bold mb-2">{{ $advantage->title ?? $advantage->name ?? 'AI 提效' }}</h4>
+                    <h4 class="font-bold mb-2">{{ $advantage->title ?? 'AI 提效' }}</h4>
                     <p class="text-xs text-muted-foreground leading-relaxed">{{ $advantage->description ?? 'AI 工具辅助加速设计与开发，提升效率，缩短交付周期' }}</p>
                 </div>
             @empty
