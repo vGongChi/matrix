@@ -34,5 +34,8 @@ Route::group([
     // 团队管理
     $router->resource('teams', 'TeamController');//团队管理
 
+    // 素材管理
+    $router->resource('materials', 'MaterialController');//素材管理
+
 });
  

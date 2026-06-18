@@ -38,6 +38,7 @@ Route::get('/cases', [CaseController::class, 'index']);
 Route::get('/cases/{id}', [CaseController::class, 'show']);
 Route::get('/case-tags', [CaseTagController::class, 'index']);
 use App\Http\Controllers\Api\TeamController as ApiTeamController;
+use App\Http\Controllers\Api\MaterialController as ApiMaterialController;
 
 Route::get('/case-tags/{id}', [CaseTagController::class, 'show']);
 Route::get('/advantages', [AdvantageController::class, 'index']);
@@ -55,4 +56,11 @@ Route::get('/teams/{id}', [ApiTeamController::class, 'show']);
 Route::post('/teams', [ApiTeamController::class, 'store']);
 Route::put('/teams/{id}', [ApiTeamController::class, 'update']);
 Route::delete('/teams/{id}', [ApiTeamController::class, 'destroy']);
+
+// Material API
+Route::get('/materials', [ApiMaterialController::class, 'index']);
+Route::get('/materials/{id}', [ApiMaterialController::class, 'show']);
+Route::post('/materials', [ApiMaterialController::class, 'store']);
+Route::put('/materials/{id}', [ApiMaterialController::class, 'update']);
+Route::delete('/materials/{id}', [ApiMaterialController::class, 'destroy']);
 
