@@ -92,10 +92,12 @@ class MaterialController extends AdminController
             ->help('建议尺寸：800x600 或 16:9 比例');
 
         // 图片类型字段
-        $form->url('image_url', __('图片URL'))->placeholder('https://example.com/image.jpg');
+        $form->image('image_url', __('图片'))->removable()
+            ->help('支持 JPG、PNG、GIF 等图片格式，可上传大文件');
 
         // 视频类型字段
-        $form->url('video_url', __('视频URL'))->placeholder('https://example.com/video.mp4');
+        $form->file('video_url', __('视频'))->removable()
+            ->help('支持 MP4、WebM、AVI 等视频格式，可上传大文件');
 
         // 文字类型字段
         $form->textarea('text_content', __('文字内容'))->rows(8)
