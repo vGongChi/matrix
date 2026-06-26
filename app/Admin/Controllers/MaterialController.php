@@ -59,7 +59,24 @@ class MaterialController extends AdminController
         $show->field('description', __('描述'));
         $show->field('thumbnail', __('缩略图'))->image();
         
-        $show->field('image_url', __('图片URL'));
+        $show->field('image_url', __('图片'))->as(function ($value) {
+            if (is_array($value)) {
+                $images = $value;
+            } else {
+                $images = json_decode($value, true);
+                if (!is_array($images)) {
+                    $images = $value ? [$value] : [];
+                }
+            }
+
+            if (empty($images)) {
+                return '-';
+            }
+
+            return collect($images)->map(function ($path) {
+                return "<img src=\"/storage/admin/{$path}\" style=\"max-width: 120px; margin-right: 8px; margin-bottom: 8px;\" />";
+            })->implode('');
+        })->unescape();
         $show->field('video_url', __('视频URL'));
         $show->field('text_content', __('文字内容'));
         $show->field('code_content', __('代码内容'))->code();
@@ -92,8 +109,8 @@ class MaterialController extends AdminController
             ->help('建议尺寸：800x600 或 16:9 比例');
 
         // 图片类型字段
-        $form->image('image_url', __('图片'))->removable()
-            ->help('支持 JPG、PNG、GIF 等图片格式，可上传大文件');
+        $form->multipleImage('image_url', __('图片'))->removable()
+            ->help('支持多张图片，第一张为主图');
 
         // 视频类型字段
         $form->file('video_url', __('视频'))->removable()

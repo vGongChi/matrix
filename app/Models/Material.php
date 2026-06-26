@@ -31,6 +31,11 @@ class Material extends Model
         'is_active',
     ];
 
+    protected $casts = [
+        'image_url' => 'array',
+        'is_active' => 'boolean',
+    ];
+
     public static function getTypes()
     {
         return [
@@ -59,6 +64,35 @@ class Material extends Model
     public function getTypeNameAttribute()
     {
         return self::getTypes()[$this->type] ?? '未知类型';
+    }
+
+    public function getImageUrlAttribute($value)
+    {
+        if (is_array($value)) {
+            return $value;
+        }
+
+        if (empty($value)) {
+            return [];
+        }
+
+        $decoded = json_decode($value, true);
+
+        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+            return $decoded;
+        }
+
+        return [$value];
+    }
+
+    public function setImageUrlAttribute($value)
+    {
+        if (is_array($value)) {
+            $this->attributes['image_url'] = json_encode(array_values($value));
+            return;
+        }
+
+        $this->attributes['image_url'] = $value;
     }
 }
 

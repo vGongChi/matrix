@@ -12,8 +12,44 @@
             <div class="lg:col-span-2">
                 <!-- 图片素材 -->
                 @if($material->type === 'image')
+                    @php
+                        $imageUrls = is_array($material->image_url)
+                            ? $material->image_url
+                            : (filled($material->image_url) ? [$material->image_url] : []);
+                    @endphp
+
                     <div class="rounded-2xl overflow-hidden border border-border mb-8">
-                        <img src="/storage/admin/{{ $material->image_url }}" alt="{{ $material->title }}" class="w-full h-auto" />
+                        <div class="relative bg-black aspect-video overflow-hidden">
+                            @if(count($imageUrls) > 1)
+                                @foreach($imageUrls as $index => $url)
+                                    <img
+                                        src="/storage/admin/{{ $url }}"
+                                        alt="{{ $material->title }}"
+                                        class="carousel-image absolute inset-0 w-full h-full object-cover transition-opacity duration-500 {{ $index === 0 ? 'opacity-100' : 'opacity-0' }}"
+                                        data-carousel-index="{{ $index }}"
+                                    />
+                                @endforeach
+
+                                <button type="button" onclick="prevImage()" class="absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-black/50 text-white p-3 hover:bg-black/70 transition">
+                                    <iconify-icon icon="lucide:chevron-left"></iconify-icon>
+                                </button>
+                                <button type="button" onclick="nextImage()" class="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-black/50 text-white p-3 hover:bg-black/70 transition">
+                                    <iconify-icon icon="lucide:chevron-right"></iconify-icon>
+                                </button>
+
+                                <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2">
+                                    @foreach($imageUrls as $index => $url)
+                                        <button type="button" class="carousel-dot w-2.5 h-2.5 rounded-full transition-colors {{ $index === 0 ? 'bg-white' : 'bg-white/50' }}" onclick="goToImage({{ $index }})"></button>
+                                    @endforeach
+                                </div>
+                            @elseif(count($imageUrls) === 1)
+                                <img src="/storage/admin/{{ $imageUrls[0] }}" alt="{{ $material->title }}" class="w-full h-full object-cover" />
+                            @else
+                                <div class="w-full h-full flex items-center justify-center text-white text-sm">
+                                    暂无图片
+                                </div>
+                            @endif
+                        </div>
                     </div>
                 @endif
 
@@ -170,6 +206,41 @@
             navigator.clipboard.writeText(url).then(() => {
                 alert('分享链接已复制');
             });
+        }
+
+        let currentCarouselIndex = 0;
+        const carouselImages = document.querySelectorAll('.carousel-image');
+        const carouselDots = document.querySelectorAll('.carousel-dot');
+
+        function updateCarousel(index) {
+            if (!carouselImages.length) {
+                return;
+            }
+
+            const total = carouselImages.length;
+            currentCarouselIndex = (index + total) % total;
+
+            carouselImages.forEach((img, idx) => {
+                img.classList.toggle('opacity-100', idx === currentCarouselIndex);
+                img.classList.toggle('opacity-0', idx !== currentCarouselIndex);
+            });
+
+            carouselDots.forEach((dot, idx) => {
+                dot.classList.toggle('bg-white', idx === currentCarouselIndex);
+                dot.classList.toggle('bg-white/50', idx !== currentCarouselIndex);
+            });
+        }
+
+        function prevImage() {
+            updateCarousel(currentCarouselIndex - 1);
+        }
+
+        function nextImage() {
+            updateCarousel(currentCarouselIndex + 1);
+        }
+
+        function goToImage(index) {
+            updateCarousel(index);
         }
     </script>
 @endsection
