@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Models\Settings;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Intervention\Image\ImageManager;
 
@@ -21,8 +23,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
         Schema::defaultStringLength(191);
         $imageManager = new ImageManager(['driver' => 'imagick']);
+
+        View::composer('*', function ($view) {
+            $view->with('settings', Settings::first());
+        });
     }
 }

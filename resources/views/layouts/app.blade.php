@@ -3,7 +3,14 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@yield('title', '元亨微阵科技工作室')</title>
+    <title>@yield('title', isset($settings) ? ($settings->seo_title ?: $settings->site_name ?: '元亨微阵科技工作室') : '元亨微阵科技工作室')</title>
+    <meta name="description" content="@yield('meta_description', isset($settings) ? ($settings->seo_description ?: '') : '')" />
+    <meta name="keywords" content="@yield('meta_keywords', isset($settings) ? ($settings->seo_keywords ?: '') : '')" />
+    <meta property="og:title" content="@yield('og_title', isset($settings) ? ($settings->seo_title ?: $settings->site_name ?: '元亨微阵科技工作室') : '元亨微阵科技工作室')" />
+    <meta property="og:description" content="@yield('og_description', isset($settings) ? ($settings->seo_description ?: '') : '')" />
+    <meta property="og:image" content="@yield('og_image', isset($settings) ? ($settings->seo_image ? asset('/storage/admin/'.$settings->seo_image) : ($settings->logo ? asset('/storage/admin/'.$settings->logo) : '')) : '')" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Poppins:wght@100..900&family=Fira+Code:wght@300..700&family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet" />

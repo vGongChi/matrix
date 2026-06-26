@@ -17,6 +17,10 @@ class Settings extends Model
         'email',
         'address',
         'wechat_qr',
+        'seo_title',
+        'seo_description',
+        'seo_keywords',
+        'seo_image',
     ];
 
     protected $casts = [
