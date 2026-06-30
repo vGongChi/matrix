@@ -44,8 +44,8 @@ class MaterialController extends AdminController
                 return '-';
             }
 
-            return "<img src=\"/storage/admin/{$first}\" style=\"max-width: 40px; max-height: 40px; object-fit: cover;\" />";
-        })->escape(false);
+            return new \Illuminate\Support\HtmlString("<img src=\"/storage/admin/{$first}\" style=\"max-width: 40px; max-height: 40px; object-fit: cover;\" />");
+        });
         $grid->column('sort', __('排序'))->sortable();
         $grid->column('is_active', __('启用'))->switch();
         $grid->column('created_at', __('创建时间'))->sortable();
@@ -81,10 +81,12 @@ class MaterialController extends AdminController
                 return '-';
             }
 
-            return collect($thumbs)->map(function ($path) {
+            $html = collect($thumbs)->map(function ($path) {
                 return "<img src=\"/storage/admin/{$path}\" style=\"max-width: 120px; margin-right: 8px; margin-bottom: 8px;\" />";
             })->implode('');
-        })->unescape();
+
+            return new \Illuminate\Support\HtmlString($html);
+        });
         $show->field('image_url', __('下载地址'))->as(function ($value) {
             return $value ?: '-';
         });
