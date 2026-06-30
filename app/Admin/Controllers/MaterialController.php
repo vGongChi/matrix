@@ -35,7 +35,17 @@ class MaterialController extends AdminController
             'code' => 'warning',
         ]);
         $grid->column('description', __('描述'))->limit(50);
-        $grid->column('thumbnail', __('缩略图'))->image(null, 40);
+        $grid->column('thumbnail', __('缩略图'))->display(function ($value) {
+            $thumbs = is_array($value) ? $value : (is_string($value) ? json_decode($value, true) : []);
+            $thumbs = is_array($thumbs) ? $thumbs : [];
+            $first = $thumbs[0] ?? '';
+
+            if (empty($first)) {
+                return '-';
+            }
+
+            return "<img src=\"/storage/admin/{$first}\" style=\"max-width: 40px; max-height: 40px; object-fit: cover;\" />";
+        })->escape(false);
         $grid->column('sort', __('排序'))->sortable();
         $grid->column('is_active', __('启用'))->switch();
         $grid->column('created_at', __('创建时间'))->sortable();
@@ -57,32 +67,33 @@ class MaterialController extends AdminController
         $show->field('title', __('标题'));
         $show->field('type', __('类型'))->using(Material::getTypes());
         $show->field('description', __('描述'));
-        $show->field('thumbnail', __('缩略图'))->image();
-        
-        $show->field('image_url', __('图片'))->as(function ($value) {
+        $show->field('thumbnail', __('缩略图'))->as(function ($value) {
             if (is_array($value)) {
-                $images = $value;
+                $thumbs = $value;
             } else {
-                $images = json_decode($value, true);
-                if (!is_array($images)) {
-                    $images = $value ? [$value] : [];
+                $thumbs = json_decode($value, true);
+                if (!is_array($thumbs)) {
+                    $thumbs = $value ? [$value] : [];
                 }
             }
 
-            if (empty($images)) {
+            if (empty($thumbs)) {
                 return '-';
             }
 
-            return collect($images)->map(function ($path) {
+            return collect($thumbs)->map(function ($path) {
                 return "<img src=\"/storage/admin/{$path}\" style=\"max-width: 120px; margin-right: 8px; margin-bottom: 8px;\" />";
             })->implode('');
         })->unescape();
+        $show->field('image_url', __('下载地址'))->as(function ($value) {
+            return $value ?: '-';
+        });
         $show->field('video_url', __('视频URL'));
         $show->field('text_content', __('文字内容'));
         $show->field('code_content', __('代码内容'))->code();
         $show->field('code_language', __('代码语言'));
         $show->field('code_repo_url', __('代码仓库地址'));
-        
+
         $show->field('sort', __('排序'));
         $show->field('is_active', __('启用'));
         $show->field('created_at', __('创建时间'));
@@ -104,13 +115,12 @@ class MaterialController extends AdminController
         $form->select('type', __('素材类型'))->options(Material::getTypes())->required()
             ->help('选择素材类型后，对应的字段会自动显示');
         $form->textarea('description', __('素材描述'))->rows(3)->placeholder('简短的素材描述或说明');
-        
-        $form->image('thumbnail', __('封面缩略图'))->required()
-            ->help('建议尺寸：800x600 或 16:9 比例');
 
-        // 图片类型字段
-        $form->multipleImage('image_url', __('图片'))->removable()
-            ->help('支持多张图片，第一张为主图');
+        $form->multipleImage('thumbnail', __('缩略图'))->removable()->required()
+            ->help('支持上传多张缩略图，前台会按顺序轮播显示');
+
+        $form->text('image_url', __('下载地址（网盘/文件地址）'))->placeholder('例如：https://pan.baidu.com/...')
+            ->help('点击前台下载按钮时会打开该地址');
 
         // 视频类型字段
         $form->file('video_url', __('视频'))->removable()

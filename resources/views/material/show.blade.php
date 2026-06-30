@@ -5,23 +5,25 @@
 @section('content')
     @include('partials.header')
 
+    @php
+        $thumbnailUrls = $material->thumbnail ?? [];
+        if (!is_array($thumbnailUrls)) {
+            $thumbnailUrls = filled($thumbnailUrls) ? [$thumbnailUrls] : [];
+        }
+        $coverUrl = $thumbnailUrls[0] ?? null;
+    @endphp
+
     <!-- 素材详情 -->
     <section class="w-full py-20 lg:py-32 px-8 lg:px-24">
         <div class="grid lg:grid-cols-3 gap-12">
             <!-- 素材内容展示 -->
             <div class="lg:col-span-2">
-                <!-- 图片素材 -->
-                @if($material->type === 'image')
-                    @php
-                        $imageUrls = is_array($material->image_url)
-                            ? $material->image_url
-                            : (filled($material->image_url) ? [$material->image_url] : []);
-                    @endphp
-
+                <!-- 缩略图展示 -->
+                @if(count($thumbnailUrls) > 0)
                     <div class="rounded-2xl overflow-hidden border border-border mb-8">
                         <div class="relative bg-black aspect-video overflow-hidden">
-                            @if(count($imageUrls) > 1)
-                                @foreach($imageUrls as $index => $url)
+                            @if(count($thumbnailUrls) > 1)
+                                @foreach($thumbnailUrls as $index => $url)
                                     <img
                                         src="/storage/admin/{{ $url }}"
                                         alt="{{ $material->title }}"
@@ -38,16 +40,12 @@
                                 </button>
 
                                 <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2">
-                                    @foreach($imageUrls as $index => $url)
+                                    @foreach($thumbnailUrls as $index => $url)
                                         <button type="button" class="carousel-dot w-2.5 h-2.5 rounded-full transition-colors {{ $index === 0 ? 'bg-white' : 'bg-white/50' }}" onclick="goToImage({{ $index }})"></button>
                                     @endforeach
                                 </div>
-                            @elseif(count($imageUrls) === 1)
-                                <img src="/storage/admin/{{ $imageUrls[0] }}" alt="{{ $material->title }}" class="w-full h-full object-cover" />
-                            @else
-                                <div class="w-full h-full flex items-center justify-center text-white text-sm">
-                                    暂无图片
-                                </div>
+                            @elseif(count($thumbnailUrls) === 1)
+                                <img src="/storage/admin/{{ $thumbnailUrls[0] }}" alt="{{ $material->title }}" class="w-full h-full object-cover" />
                             @endif
                         </div>
                     </div>
@@ -111,7 +109,13 @@
                 <!-- 素材卡片 -->
                 <div class="rounded-2xl border border-border overflow-hidden bg-card sticky top-24">
                     <div class="aspect-video bg-muted overflow-hidden">
-                        <img src="/storage/admin/{{ $material->thumbnail }}" alt="{{ $material->title }}" class="w-full h-full object-cover" />
+                        @if($coverUrl)
+                            <img src="/storage/admin/{{ $coverUrl }}" alt="{{ $material->title }}" class="w-full h-full object-cover" />
+                        @else
+                            <div class="w-full h-full flex items-center justify-center text-muted-foreground text-sm">
+                                暂无缩略图
+                            </div>
+                        @endif
                     </div>
 
                     <div class="p-6">
@@ -153,10 +157,17 @@
                                 <iconify-icon icon="lucide:share-2"></iconify-icon>
                                 分享
                             </button>
-                            <button class="flex-1 bg-primary text-primary-foreground px-4 py-2.5 rounded-lg font-semibold hover:shadow-lg hover:shadow-primary/20 transition-all flex items-center justify-center gap-2">
-                                <iconify-icon icon="lucide:download"></iconify-icon>
-                                下载
-                            </button>
+                            @if(filled($material->image_url))
+                                <a href="{{ $material->image_url }}" target="_blank" rel="noopener noreferrer" class="flex-1 bg-primary text-primary-foreground px-4 py-2.5 rounded-lg font-semibold hover:shadow-lg hover:shadow-primary/20 transition-all flex items-center justify-center gap-2">
+                                    <iconify-icon icon="lucide:download"></iconify-icon>
+                                    下载
+                                </a>
+                            @else
+                                <button disabled class="flex-1 bg-muted text-muted-foreground px-4 py-2.5 rounded-lg font-semibold cursor-not-allowed flex items-center justify-center gap-2">
+                                    <iconify-icon icon="lucide:download"></iconify-icon>
+                                    下载
+                                </button>
+                            @endif
                         </div>
 
                         <button class="w-full bg-primary text-primary-foreground px-6 py-3 rounded-xl font-bold hover:shadow-lg hover:shadow-primary/20 transition-all flex items-center justify-center gap-2">
@@ -176,10 +187,23 @@
 
             <div class="grid md:grid-cols-3 lg:grid-cols-4 gap-6">
                 @foreach($relatedMaterials as $related)
+                    @php
+                        $relatedThumbnailUrls = $related->thumbnail ?? [];
+                        if (!is_array($relatedThumbnailUrls)) {
+                            $relatedThumbnailUrls = filled($relatedThumbnailUrls) ? [$relatedThumbnailUrls] : [];
+                        }
+                        $relatedCoverUrl = $relatedThumbnailUrls[0] ?? null;
+                    @endphp
                     <a href="{{ route('material.show', $related->id) }}" class="group">
                         <div class="bg-card rounded-2xl border border-border hover:border-primary/50 overflow-hidden transition-all hover:shadow-xl hover:shadow-primary/5">
                             <div class="relative h-40 bg-muted overflow-hidden">
-                                <img src="{{ $related->thumbnail }}" alt="{{ $related->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                                @if($relatedCoverUrl)
+                                    <img src="/storage/admin/{{ $relatedCoverUrl }}" alt="{{ $related->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                                @else
+                                    <div class="w-full h-full flex items-center justify-center text-muted-foreground text-sm">
+                                        暂无缩略图
+                                    </div>
+                                @endif
                             </div>
                             <div class="p-4">
                                 <h3 class="font-bold text-sm line-clamp-2 group-hover:text-primary transition-colors">{{ $related->title }}</h3>

@@ -37,11 +37,24 @@
         @if($materials->count() > 0)
             <div class="grid md:grid-cols-3 lg:grid-cols-4 gap-6 mb-12">
                 @foreach($materials as $material)
+                    @php
+                        $materialThumbnailUrls = $material->thumbnail ?? [];
+                        if (!is_array($materialThumbnailUrls)) {
+                            $materialThumbnailUrls = filled($materialThumbnailUrls) ? [$materialThumbnailUrls] : [];
+                        }
+                        $materialCoverUrl = $materialThumbnailUrls[0] ?? null;
+                    @endphp
                     <a href="{{ route('material.show', $material->id) }}" class="group">
                         <div class="bg-card rounded-2xl border border-border hover:border-primary/50 overflow-hidden transition-all hover:shadow-xl hover:shadow-primary/5">
                             <!-- 缩略图 -->
                             <div class="relative h-48 bg-muted overflow-hidden">
-                                <img src="/storage/admin/{{ $material->thumbnail }}" alt="{{ $material->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                                @if($materialCoverUrl)
+                                    <img src="/storage/admin/{{ $materialCoverUrl }}" alt="{{ $material->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                                @else
+                                    <div class="w-full h-full flex items-center justify-center text-muted-foreground text-sm">
+                                        暂无缩略图
+                                    </div>
+                                @endif
                                 
                                 <!-- 类型徽章 -->
                                 <div class="absolute top-3 left-3">

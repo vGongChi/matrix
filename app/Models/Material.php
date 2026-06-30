@@ -32,7 +32,6 @@ class Material extends Model
     ];
 
     protected $casts = [
-        'image_url' => 'array',
         'is_active' => 'boolean',
     ];
 
@@ -66,10 +65,10 @@ class Material extends Model
         return self::getTypes()[$this->type] ?? '未知类型';
     }
 
-    public function getImageUrlAttribute($value)
+    public function getThumbnailAttribute($value)
     {
         if (is_array($value)) {
-            return $value;
+            return $this->normalizeImageList($value);
         }
 
         if (empty($value)) {
@@ -79,20 +78,58 @@ class Material extends Model
         $decoded = json_decode($value, true);
 
         if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-            return $decoded;
+            return $this->normalizeImageList($decoded);
         }
 
-        return [$value];
+        return $this->normalizeImageList([$value]);
+    }
+
+    public function setThumbnailAttribute($value)
+    {
+        if (is_array($value)) {
+            $this->attributes['thumbnail'] = json_encode($this->normalizeImageList($value));
+            return;
+        }
+
+        $this->attributes['thumbnail'] = $value;
+    }
+
+    public function getImageUrlAttribute($value)
+    {
+        if (is_array($value)) {
+            return $value[0] ?? '';
+        }
+
+        if (empty($value)) {
+            return '';
+        }
+
+        $decoded = json_decode($value, true);
+
+        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+            return $decoded[0] ?? '';
+        }
+
+        return trim((string) $value);
     }
 
     public function setImageUrlAttribute($value)
     {
         if (is_array($value)) {
-            $this->attributes['image_url'] = json_encode(array_values($value));
+            $this->attributes['image_url'] = (string) ($value[0] ?? '');
             return;
         }
 
-        $this->attributes['image_url'] = $value;
+        $this->attributes['image_url'] = trim((string) $value);
+    }
+
+    protected function normalizeImageList(array $values): array
+    {
+        return array_values(array_filter(array_map(function ($item) {
+            return is_string($item) ? trim($item) : $item;
+        }, $values), function ($item) {
+            return filled($item);
+        }));
     }
 }
 
