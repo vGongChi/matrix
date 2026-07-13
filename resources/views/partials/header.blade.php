@@ -8,17 +8,27 @@
         <span class="text-[10px] text-muted-foreground uppercase tracking-[0.2em]">{{ $settings->site_name_en ?? 'YUANHENG MATRIX STUDIO' }}</span>
       </div>
     </div>
-    
+
     <nav class="hidden lg:flex items-center gap-10">
-      <a href="#" class="text-sm font-medium hover:text-primary transition-colors">首页</a>
-      <a href="#services" class="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">服务</a>
-      <a href="#cases" class="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">案例</a>
-      <a href="#process" class="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">流程</a>
-      <a href="/team" class="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">团队</a>
-      <a href="/material" class="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">开源中心</a>
+      <a href="{{ url('/') }}" class="text-sm font-medium hover:text-primary transition-colors">首页</a>
+      <a href="{{ url('/#services') }}" class="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">服务</a>
+      <a href="{{ url('/#cases') }}" class="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">案例</a>
+      <a href="{{ url('/#process') }}" class="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">流程</a>
+      <a href="{{ url('/team') }}" class="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">团队</a>
+      <a href="{{ url('/material') }}" class="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">开源中心</a>
     </nav>
-    
+
     <button class="bg-primary text-primary-foreground px-6 py-2.5 rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity">
       立即咨询
     </button>
-  </header>
+</header>
+
+<style>
+html {
+  scroll-behavior: smooth;
+}
+
+section[id] {
+  scroll-margin-top: 96px;
+}
+</style>
