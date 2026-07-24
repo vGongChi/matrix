@@ -19,13 +19,12 @@ php artisan config:clear
 php artisan cache:clear
 php artisan route:clear
 php artisan view:clear
-
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
 
 echo "数据库迁移"
-php artisan migrate --force
+# php artisan migrate --force
 
 echo "权限修复"
 chown -R www-data:www-data storage bootstrap/cache
