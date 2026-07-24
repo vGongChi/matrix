@@ -3,6 +3,7 @@
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\TeamController;
 use App\Http\Controllers\MaterialController;
+use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -21,3 +22,4 @@ Route::get('/team', [TeamController::class, 'index'])->name('team.index');
 Route::get('/team/{id}', [TeamController::class, 'show'])->name('team.show');
 Route::get('material', [MaterialController::class, 'index'])->name('material.index');
 Route::get('/material/{id}', [MaterialController::class, 'show'])->name('material.show');
+Route::get('/products', [ProductController::class, 'index'])->name('products.index');

@@ -80,9 +80,9 @@
                     <p class="text-muted-foreground text-sm leading-relaxed mb-6">
                         {{ $service->description ?? '企业官网、产品官网、营销落地页，高性能、SEO 友好、响应式设计' }}
                     </p>
-                    <a href="{{ $service->link ?? '#' }}" class="text-primary text-sm font-bold flex items-center gap-1 hover:gap-2 transition-all">
+                    <!-- <a href="{{ $service->link ?? '#' }}" class="text-primary text-sm font-bold flex items-center gap-1 hover:gap-2 transition-all">
                         {{ $service->cta_text ?? '了解详情' }} <iconify-icon icon="lucide:arrow-right"></iconify-icon>
-                    </a>
+                    </a> -->
                 </div>
             @empty
                 <div class="bg-card p-10 rounded-2xl border border-border hover:border-primary/50 hover:shadow-xl hover:shadow-primary/5 transition-all group">
@@ -143,9 +143,9 @@
                             @endif
                         </div>
                         <p class="text-sm text-muted-foreground mb-4">{{ $case->description ?? '为 AI 写作工具打造的品牌官网，提升品牌专业度与信任感，转化率提升 40%。' }}</p>
-                        <a href="{{ $case->link ?? '#' }}" class="text-primary text-sm font-bold flex items-center gap-1 group-hover:gap-2 transition-all">
+                        <!-- <a href="{{ $case->link ?? '#' }}" class="text-primary text-sm font-bold flex items-center gap-1 group-hover:gap-2 transition-all">
                             {{ $case->cta_text ?? '查看详情' }} <iconify-icon icon="lucide:arrow-right"></iconify-icon>
-                        </a>
+                        </a> -->
                     </div>
                 </div>
             @empty

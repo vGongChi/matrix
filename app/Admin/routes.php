@@ -37,5 +37,14 @@ Route::group([
     // 素材管理
     $router->resource('materials', 'MaterialController');//素材管理
 
+    // 智作·快反管理
+    $router->resource('products', 'ProductController');//商品管理
+    $router->resource('orders', 'OrderController');//订单管理
+    $router->resource('after-sale-requests', 'AfterSaleRequestController');//售后工单
+
+    $router->get('api/products', 'ApiController@products');
+    $router->get('api/users', 'ApiController@users');
+    $router->get('api/orders', 'ApiController@orders');
+
 });
  
