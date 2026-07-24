@@ -56,10 +56,6 @@
                     <div class="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
                         @foreach($products as $product)
                             @php
-                                <!-- $image = $product->demo_images[0] ?? null;
-                                $imageUrl = $image && (str_starts_with($image, 'http://') || str_starts_with($image, 'https://'))
-                                    ? $image
-                                    : ($image ? asset('storage/admin/' . ltrim($image, '/')) : null); -->
                                 $levelClass = ['light' => 'bg-emerald-50 text-emerald-700', 'standard' => 'bg-blue-50 text-blue-700', 'heavy' => 'bg-amber-50 text-amber-700'][$product->level] ?? 'bg-slate-100 text-slate-700';
                             @endphp
                             <article class="group flex flex-col overflow-hidden border border-slate-200 bg-white transition duration-300 hover:-translate-y-1 hover:border-blue-300 hover:shadow-xl hover:shadow-blue-900/10">
