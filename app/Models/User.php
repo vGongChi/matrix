@@ -14,22 +14,46 @@ class User extends Model implements AuthenticatableContract
     protected $table = 'users';
 
     protected $fillable = [
-        'name',
         'email',
+        'phone',
+        'name',
         'password',
-        'mobile',
-        'avatar',
-        'company_name',
-        'company_license',
-        'license_verified',
-        'status',
+        'token',
+        'state',
+        'balance',
     ];
 
     protected $casts = [
-        'email_verified_at' => 'datetime',
-        'mobile_verified_at' => 'datetime',
-        'license_verified' => 'boolean',
-        'status' => 'boolean',
-        'last_login_at' => 'datetime',
+        'balance' => 'decimal:2',
     ];
+
+    public function getAuthPassword()
+    {
+        return $this->password;
+    }
+
+    public function getAuthIdentifierName()
+    {
+        return 'id';
+    }
+
+    public function getAuthIdentifier()
+    {
+        return $this->getKey();
+    }
+
+    public function getRememberToken()
+    {
+        return $this->token;
+    }
+
+    public function setRememberToken($value)
+    {
+        $this->token = $value;
+    }
+
+    public function getRememberTokenName()
+    {
+        return 'token';
+    }
 }
