@@ -16,10 +16,10 @@
       <a href="{{ url('/#process') }}" class="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">流程</a>
       <a href="{{ url('/team') }}" class="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">团队</a>
       <a href="{{ url('/material') }}" class="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">开源中心</a>
-      <a href="{{ route('products.index') }}" class="text-sm font-semibold text-primary hover:text-primary/70 transition-colors">AI极速工坊</a>
+      <a href="{{ url('/products') }}" class="text-sm font-semibold text-primary hover:text-primary/70 transition-colors">AI极速工坊</a>
     </nav>
 
-    <a href="{{ route('products.index') }}" class="bg-primary text-primary-foreground px-6 py-2.5 rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity">立即咨询</a>
+    <a href="{{ url('/products') }}" class="bg-primary text-primary-foreground px-6 py-2.5 rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity">立即咨询</a>
 </header>
 
 <style>
