@@ -100,7 +100,7 @@
 
                                     <div class="mt-auto flex items-center justify-between gap-4 pt-6">
                                         <span class="flex items-center gap-1.5 text-xs font-medium text-slate-500"><iconify-icon icon="lucide:refresh-cw" class="text-sm"></iconify-icon>{{ $product->max_revisions }} 次修改</span>
-                                        <a href="#start-order" class="inline-flex items-center gap-2 bg-slate-950 px-4 py-3 text-sm font-bold text-white transition hover:bg-primary">开始定制 <iconify-icon icon="lucide:arrow-up-right"></iconify-icon></a>
+                                        <button type="button" data-product-id="{{ $product->id }}" data-product-name="{{ $product->name }}" class="order-start inline-flex items-center gap-2 bg-slate-950 px-4 py-3 text-sm font-bold text-white transition hover:bg-primary">开始定制 <iconify-icon icon="lucide:arrow-up-right"></iconify-icon></button>
                                     </div>
                                 </div>
                             </article>
@@ -117,4 +117,130 @@
             </div>
         </section>
     </main>
+
+    <div id="order-modal" class="hidden fixed inset-0 z-50 bg-slate-950/60 flex items-center justify-center px-4">
+        <div class="w-full max-w-2xl rounded-[2rem] bg-white p-8 shadow-2xl">
+            <div class="mb-6 flex items-center justify-between">
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-950">填写订单需求</h2>
+                    <p id="order-modal-product" class="mt-2 text-sm text-slate-500"></p>
+                </div>
+                <button type="button" data-close-order-modal class="text-slate-400 hover:text-slate-900">关闭</button>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="mb-2 block text-sm font-medium text-slate-700">需求描述</label>
+                    <textarea id="order-requirements" rows="6" class="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary"></textarea>
+                </div>
+                <div>
+                    <label class="mb-2 block text-sm font-medium text-slate-700">补充说明（可选）</label>
+                    <textarea id="order-notes" rows="3" class="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary"></textarea>
+                </div>
+                <div class="flex flex-wrap items-center gap-4">
+                    <button id="order-save-btn" type="button" class="inline-flex items-center justify-center rounded-2xl bg-primary px-6 py-3 text-sm font-semibold text-white transition hover:bg-blue-600">提交需求</button>
+                    <span id="order-save-feedback" class="text-sm text-red-600"></span>
+                </div>
+                <input type="hidden" id="order-product-id" value="">
+            </div>
+        </div>
+    </div>
 @endsection
+
+@push('scripts')
+<script>
+    const isAuthenticated = {{ auth()->check() ? 'true' : 'false' }};
+    const orderButtons = document.querySelectorAll('.order-start');
+    const orderModal = document.getElementById('order-modal');
+    const orderModalProduct = document.getElementById('order-modal-product');
+    const orderRequirements = document.getElementById('order-requirements');
+    const orderNotes = document.getElementById('order-notes');
+    const orderSaveBtn = document.getElementById('order-save-btn');
+    const orderSaveFeedback = document.getElementById('order-save-feedback');
+    const orderProductId = document.getElementById('order-product-id');
+
+    function openOrderModal(productId, productName) {
+        if (!orderModal || !orderProductId || !orderModalProduct) return;
+        orderProductId.value = productId;
+        orderModalProduct.textContent = `商品：${productName}`;
+        orderRequirements.value = '';
+        orderNotes.value = '';
+        orderSaveFeedback.textContent = '';
+        orderModal.classList.remove('hidden');
+    }
+
+    function closeOrderModal() {
+        if (!orderModal) return;
+        orderModal.classList.add('hidden');
+    }
+
+    document.addEventListener('click', function (event) {
+        if (event.target.dataset.closeOrderModal !== undefined) {
+            closeOrderModal();
+        }
+    });
+
+    orderButtons.forEach(function (button) {
+        button.addEventListener('click', function () {
+            const productId = this.dataset.productId;
+            const productName = this.dataset.productName || '项目';
+            if (!isAuthenticated) {
+                document.querySelector('[data-open-auth-modal="1"]').click();
+                return;
+            }
+            openOrderModal(productId, productName);
+        });
+    });
+
+    if (orderSaveBtn) {
+        orderSaveBtn.addEventListener('click', async function () {
+            if (!orderProductId || !orderRequirements) return;
+            const productId = orderProductId.value;
+            const requirements = orderRequirements.value.trim();
+            const notes = orderNotes.value.trim();
+
+            if (!requirements) {
+                orderSaveFeedback.textContent = '请填写需求描述';
+                orderRequirements.focus();
+                return;
+            }
+
+            orderSaveFeedback.textContent = '';
+            orderSaveBtn.disabled = true;
+            orderSaveBtn.textContent = '提交中...';
+
+            try {
+                const res = await fetch('/orders', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({
+                        product_id: productId,
+                        requirements: [{
+                            'type': 'description',
+                            'content': requirements,
+                        }],
+                        customer_notes: notes,
+                    }),
+                });
+
+                const data = await res.json();
+                if (res.ok && data.redirect) {
+                    window.location.href = data.redirect;
+                    return;
+                }
+
+                orderSaveFeedback.textContent = data.message || '提交失败，请稍后再试';
+            } catch (error) {
+                orderSaveFeedback.textContent = '网络异常，请稍后重试';
+            } finally {
+                orderSaveBtn.disabled = false;
+                orderSaveBtn.textContent = '提交需求';
+            }
+        });
+    }
+</script>
+@endpush

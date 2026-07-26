@@ -13,14 +13,14 @@ class FrontAuthController extends Controller
 {
     public function sendCode(Request $request)
     {
-        $request->validate([
-            'email' => ['required', 'email'],
+        $data = $request->validate([
+            'email' => ['required', 'email', 'max:191'],
         ]);
 
-        $email = strtolower($request->email);
+        $email = strtolower($data['email']);
         $code = (string) random_int(100000, 999999);
 
-        $user = User::where('email', $email)->first();
+        $user = User::where('email', '=', $email, 'and')->first();
 
         if (! $user) {
             $user = new User();
@@ -28,83 +28,87 @@ class FrontAuthController extends Controller
             $user->phone = '';
             $user->name = $email;
             $user->password = Hash::make(Str::random(16));
-            $user->token = $code;
             $user->state = 'pending';
             $user->balance = 0;
-            $user->save();
-        } else {
-            $user->token = $code;
-            $user->state = 'pending';
-            $user->save();
         }
 
-        // 先用邮件发送占位，后续你可真实接 SMTP
-        Mail::raw("你的邮箱验证码是：{$code}", function ($message) use ($email) {
-            $message->to($email)->subject('智作·快反邮箱验证码');
-        });
+        $user->token = $code;
+        $user->state = 'pending';
+        $user->save();
 
-        return response()->json([
-            'code' => 0,
-            'message' => '验证码已发送',
-        ]);
+        // try {
+        // 发送邮件通知管理员
+        Mail::raw("你的邮箱验证码是：{$code}", function ($message) use ($email, $code) {
+            $message->to($email)
+                ->from('gongchi@yhwzkj.com', '元亨微阵技术团队')
+                ->subject('【元亨微阵】邮箱验证码');
+        });
+        // } catch (\Throwable $e) {
+        //     return $this->errorResponse('验证码发送失败，请稍后再试', 1);
+        // }
+
+        return $this->successResponse(null, '验证码已发送');
     }
 
     public function register(Request $request)
     {
-        $request->validate([
-            'email' => ['required', 'email'],
+        $data = $request->validate([
+            'email' => ['required', 'email', 'max:191'],
             'code' => ['required', 'digits:6'],
-            'password' => ['required', 'min:6'],
+            'password' => ['required', 'min:6', 'max:191'],
             'name' => ['nullable', 'string', 'max:191'],
         ]);
 
-        $email = strtolower($request->email);
-
-        $user = User::where('email', $email)->first();
+        $email = strtolower($data['email']);
+        $user = User::where('email', '=', $email, 'and', 'and')->first();
 
         if (! $user) {
-            return response()->json(['code' => 1, 'message' => '请先发送验证码'], 422);
+            return $this->errorResponse('请先发送验证码', 1);
         }
 
-        if ($user->token !== $request->code) {
-            return response()->json(['code' => 1, 'message' => '验证码不正确'], 422);
+        if ($user->state === 'active' && $user->token === null) {
+            return $this->errorResponse('该邮箱已注册，请直接登录', 1);
         }
 
-        $user->name = $request->name ?? $email;
-        $user->password = Hash::make($request->password);
+        if ($user->token !== $data['code']) {
+            return $this->errorResponse('验证码不正确', 1);
+        }
+
+        $user->name = ! empty($data['name']) ? $data['name'] : explode('@', $email)[0];
+        $user->password = Hash::make($data['password']);
         $user->token = null;
         $user->state = 'active';
         $user->save();
 
         Auth::login($user);
 
-        return response()->json([
-            'code' => 0,
-            'message' => '注册成功',
+        return $this->successResponse([
             'redirect' => route('orders.index'),
-        ]);
+        ], '注册成功');
     }
 
     public function login(Request $request)
     {
-        $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required', 'min:6'],
+        $data = $request->validate([
+            'email' => ['required', 'email', 'max:191'],
+            'password' => ['required', 'min:6', 'max:191'],
         ]);
 
-        $user = User::where('email', strtolower($request->email))->first();
+        $user = User::where('email', '=', strtolower($data['email']), 'and')->first();
 
-        if (! $user || ! Hash::check($request->password, $user->password)) {
-            return response()->json(['code' => 1, 'message' => '邮箱或密码错误'], 422);
+        if (! $user || ! Hash::check($data['password'], $user->password)) {
+            return $this->errorResponse('邮箱或密码错误', 1);
+        }
+
+        if ($user->state !== 'active') {
+            return $this->errorResponse('账号尚未完成注册，请先完成注册', 1);
         }
 
         Auth::login($user);
 
-        return response()->json([
-            'code' => 0,
-            'message' => '登录成功',
+        return $this->successResponse([
             'redirect' => route('orders.index'),
-        ]);
+        ], '登录成功');
     }
 
     public function logout()

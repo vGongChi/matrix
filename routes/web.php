@@ -27,7 +27,7 @@ Route::get('/material/{id}', [MaterialController::class, 'show'])->name('materia
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
 
 //登录相关
-Route::post('/auth/send-code', [FrontAuthController::class, 'sendCode'])->name('auth.send-code');
+Route::any('/auth/send-code', [FrontAuthController::class, 'sendCode'])->name('auth.send-code');
 Route::post('/auth/register', [FrontAuthController::class, 'register'])->name('auth.register');
 Route::post('/auth/login', [FrontAuthController::class, 'login'])->name('auth.login');
 Route::post('/auth/logout', [FrontAuthController::class, 'logout'])->name('auth.logout');

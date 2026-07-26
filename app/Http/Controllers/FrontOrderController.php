@@ -50,6 +50,12 @@ class FrontOrderController extends Controller
             'remaining_revisions' => $product->max_revisions,
         ]);
 
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'redirect' => route('orders.show', $order->id),
+            ]);
+        }
+
         return redirect()->route('orders.show', $order->id);
     }
 
