@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Intervention\Image\ImageManagerStatic as Image;
 
 class FrontAuthController extends Controller
 {
@@ -125,14 +126,40 @@ class FrontAuthController extends Controller
 
         $data = $request->validate([
             'name' => ['nullable', 'string', 'max:191'],
-            'avatar' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
+            'avatar' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:4096'],
+            'avatar_crop' => ['nullable', 'array'],
             'phone' => ['nullable', 'string', 'max:20'],
         ]);
 
         $avatarPath = $user->avatar;
 
         if ($request->hasFile('avatar')) {
-            $avatarPath = $request->file('avatar')->store('avatars', 'public');
+            $file = $request->file('avatar');
+            $path = $file->store('avatars', 'public');
+            $fullPath = storage_path('app/public/' . $path);
+
+            $image = Image::make($fullPath);
+            $image->orientate();
+
+            $width = $image->width();
+            $height = $image->height();
+            $maxDimension = max($width, $height);
+            $image->resize($maxDimension, $maxDimension, function ($constraint) {
+                $constraint->aspectRatio();
+                $constraint->upsize();
+            });
+
+            $crop = $data['avatar_crop'] ?? null;
+            if (is_array($crop) && !empty($crop['x']) && !empty($crop['y']) && !empty($crop['width']) && !empty($crop['height'])) {
+                $image->crop((int) $crop['width'], (int) $crop['height'], (int) $crop['x'], (int) $crop['y']);
+            }
+
+            $image->fit(320, 320, function ($constraint) {
+                $constraint->upsize();
+            });
+            $image->save($fullPath);
+
+            $avatarPath = $path;
         }
 
         $user->fill([

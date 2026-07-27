@@ -32,13 +32,50 @@
                             <input type="text" name="name" value="{{ old('name', $user->name) }}" class="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary">
                         </div>
                         <div>
-                            <label class="mb-2 block text-sm font-medium text-slate-700">头像</label>
-                            <input type="file" name="avatar" id="avatar-file-input" accept="image/*" class="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 file:mr-3 file:rounded-full file:border-0 file:bg-primary file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-white hover:file:bg-blue-600">
-                            <p class="mt-2 text-xs text-slate-500">支持 JPG、PNG、WebP，最大 2MB。</p>
-                        </div>
-                        <div>
                             <label class="mb-2 block text-sm font-medium text-slate-700">手机号</label>
                             <input type="text" name="phone" value="{{ old('phone', $user->phone) }}" class="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="mb-3 block text-sm font-medium text-slate-700">头像</label>
+                            <div class="rounded-3xl border border-slate-200 bg-slate-50 p-5">
+                                <div class="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+                                    <div class="flex-1">
+                                        <input type="file" name="avatar" id="avatar-file-input" accept="image/*" class="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 file:mr-3 file:rounded-full file:border-0 file:bg-primary file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-white hover:file:bg-blue-600">
+                                        <p class="mt-2 text-xs text-slate-500">支持 JPG、PNG、WebP；图片会自动压缩并允许你裁成正方形头像。</p>
+                                        <div id="cropper-wrapper" class="mt-4 hidden rounded-2xl border border-slate-200 bg-white p-3">
+                                            <div class="overflow-hidden rounded-xl bg-slate-100">
+                                                <img id="avatar-crop-image" alt="头像裁切预览" class="max-h-[420px] w-full object-contain">
+                                            </div>
+                                            <div class="mt-3 flex items-center justify-between gap-3">
+                                                <p class="text-xs text-slate-500">拖动裁框，选择你想要的正方形头像区域。</p>
+                                                <button type="button" id="reset-crop-btn" class="rounded-full border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600">重置</button>
+                                            </div>
+                                        </div>
+                                        <input type="hidden" name="avatar_crop" id="avatar-crop-data" value="">
+                                    </div>
+                                    <div class="flex flex-col items-center gap-3 lg:min-w-[180px]">
+                                        @php
+                                            $avatarUrl = '';
+                                            if (!empty($user->avatar)) {
+                                                if (strpos($user->avatar, 'http://') === 0 || strpos($user->avatar, 'https://') === 0) {
+                                                    $avatarUrl = $user->avatar;
+                                                } else {
+                                                    $avatarUrl = asset('storage/' . $user->avatar);
+                                                }
+                                            }
+                                        @endphp
+                                        @if($avatarUrl)
+                                            <img id="avatar-preview" src="{{ $avatarUrl }}" alt="头像预览" class="h-24 w-24 rounded-full object-cover ring-4 ring-slate-100">
+                                        @else
+                                            <div id="avatar-preview" class="flex h-24 w-24 items-center justify-center rounded-full bg-slate-900 text-2xl font-bold text-white">{{ strtoupper(substr($user->name ?? 'U', 0, 1)) }}</div>
+                                        @endif
+                                        <div class="text-center">
+                                            <p class="text-sm font-semibold text-slate-900">当前头像</p>
+                                            <p class="text-sm text-slate-500">上传新图片后可裁成方形头像。</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <div>
                             <label class="mb-2 block text-sm font-medium text-slate-700">邮箱</label>
@@ -47,31 +84,8 @@
                     </div>
 
                     <div class="flex flex-col gap-6 border-t border-slate-200 pt-6 lg:flex-row lg:items-center lg:justify-between">
-                        <div class="flex items-center gap-4">
-                            @php
-                                $avatarUrl = '';
-                                if (!empty($user->avatar)) {
-                                    if (strpos($user->avatar, 'http://') === 0 || strpos($user->avatar, 'https://') === 0) {
-                                        $avatarUrl = $user->avatar;
-                                    } else {
-                                        $avatarUrl = asset('storage/' . $user->avatar);
-                                    }
-                                }
-                            @endphp
-                            @if($avatarUrl)
-                                <img id="avatar-preview" src="{{ $avatarUrl }}" alt="头像预览" class="h-16 w-16 rounded-full object-cover ring-4 ring-slate-100">
-                            @else
-                                <div id="avatar-preview" class="flex h-16 w-16 items-center justify-center rounded-full bg-slate-900 text-xl font-bold text-white">{{ strtoupper(substr($user->name ?? 'U', 0, 1)) }}</div>
-                            @endif
-                            <div>
-                                <p class="text-sm font-semibold text-slate-900">当前头像</p>
-                                <p class="text-sm text-slate-500">上传新图片即可立即替换。</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <p class="text-sm text-slate-500">邮箱仅支持查看，暂不允许修改。</p>
-                            <button type="submit" class="inline-flex items-center justify-center rounded-2xl bg-primary px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-600">保存资料</button>
-                        </div>
+                        <p class="text-sm text-slate-500">邮箱仅支持查看，暂不允许修改。</p>
+                        <button type="submit" class="inline-flex items-center justify-center rounded-2xl bg-primary px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-600">保存资料</button>
                     </div>
                 </form>
             </div>
@@ -79,22 +93,75 @@
     </main>
 @endsection
 
+@push('head')
+<link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css" rel="stylesheet">
+@endpush
+
 @push('scripts')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
 <script>
     const avatarFileInput = document.getElementById('avatar-file-input');
     const avatarPreview = document.getElementById('avatar-preview');
+    const cropperWrapper = document.getElementById('cropper-wrapper');
+    const cropImage = document.getElementById('avatar-crop-image');
+    const cropInput = document.getElementById('avatar-crop-data');
+    const resetCropBtn = document.getElementById('reset-crop-btn');
+    let cropper = null;
 
-    if (avatarFileInput && avatarPreview) {
+    function initCropper(src) {
+        if (!cropImage) return;
+        cropImage.src = src;
+        cropperWrapper.classList.remove('hidden');
+
+        if (cropper) {
+            cropper.destroy();
+        }
+
+        cropper = new Cropper(cropImage, {
+            aspectRatio: 1,
+            viewMode: 1,
+            dragMode: 'move',
+            cropBoxMovable: true,
+            cropBoxResizable: true,
+            guides: true,
+            center: true,
+            highlight: true,
+            background: false,
+            autoCropArea: 0.9,
+            responsive: true,
+            crop(event) {
+                const data = event.detail;
+                cropInput.value = JSON.stringify({
+                    x: Math.round(data.x),
+                    y: Math.round(data.y),
+                    width: Math.round(data.width),
+                    height: Math.round(data.height),
+                });
+            }
+        });
+    }
+
+    if (avatarFileInput) {
         avatarFileInput.addEventListener('change', function () {
             const file = this.files && this.files[0];
             if (!file) return;
 
             const reader = new FileReader();
             reader.onload = function (event) {
-                avatarPreview.src = event.target.result;
-                avatarPreview.className = 'h-16 w-16 rounded-full object-cover ring-4 ring-slate-100';
+                const dataUrl = event.target.result;
+                avatarPreview.src = dataUrl;
+                avatarPreview.className = 'h-24 w-24 rounded-full object-cover ring-4 ring-slate-100';
+                initCropper(dataUrl);
             };
             reader.readAsDataURL(file);
+        });
+    }
+
+    if (resetCropBtn) {
+        resetCropBtn.addEventListener('click', function () {
+            if (cropper) {
+                cropper.reset();
+            }
         });
     }
 </script>
