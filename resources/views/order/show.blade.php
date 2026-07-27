@@ -47,26 +47,37 @@
                     </div>
 
                     <div class="space-y-6">
+                        @if(session('success'))
+                            <div class="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+                                {{ session('success') }}
+                            </div>
+                        @endif
+                        @if(session('error'))
+                            <div class="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                                {{ session('error') }}
+                            </div>
+                        @endif
+
                         <div>
                             <h3 class="text-sm font-semibold uppercase tracking-[0.24em] text-slate-400">结构化需求</h3>
-                            @if(!empty($order->requirements) && is_array($order->requirements))
-                                <div class="mt-4 space-y-3 rounded-3xl border border-slate-200 bg-slate-50 p-4">
-                                    @foreach($order->requirements as $index => $requirement)
-                                        <div class="rounded-2xl bg-white p-4 shadow-sm">
-                                            <p class="text-sm font-semibold text-slate-900">需求 {{ $index + 1 }}</p>
-                                            <p class="mt-2 text-sm leading-7 text-slate-600">
-                                                @if(is_array($requirement))
-                                                    @if(!empty($requirement['content']))
-                                                        {{ $requirement['content'] }}
-                                                    @else
-                                                        {{ json_encode($requirement, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) }}
-                                                    @endif
-                                                @else
-                                                    {{ $requirement }}
-                                                @endif
-                                            </p>
-                                        </div>
-                                    @endforeach
+                            @php
+                                $requirementContent = '';
+                                if (!empty($order->requirements) && is_array($order->requirements)) {
+                                    foreach ($order->requirements as $requirement) {
+                                        if (is_array($requirement) && !empty($requirement['content'])) {
+                                            $requirementContent = $requirement['content'];
+                                            break;
+                                        }
+                                        if (is_string($requirement)) {
+                                            $requirementContent = $requirement;
+                                            break;
+                                        }
+                                    }
+                                }
+                            @endphp
+                            @if(!empty($requirementContent))
+                                <div class="mt-4 rounded-3xl border border-slate-200 bg-slate-50 p-4 text-sm leading-7 text-slate-700">
+                                    {{ $requirementContent }}
                                 </div>
                             @else
                                 <p class="mt-4 text-sm text-slate-500">暂无结构化需求内容。</p>
@@ -79,6 +90,32 @@
                                 {{ $order->customer_notes ?: '客户未填写补充说明。' }}
                             </div>
                         </div>
+
+                        @if(empty($order->deposit_paid) && $order->status === 'pending_deposit')
+                            <div class="rounded-3xl border border-blue-200 bg-blue-50/70 p-6">
+                                <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                                    <div>
+                                        <h3 class="text-lg font-bold text-slate-950">修改需求信息</h3>
+                                        <p class="mt-1 text-sm text-slate-600">在支付启动金前，你可以继续调整需求和补充说明。</p>
+                                    </div>
+                                </div>
+                                <form action="{{ route('orders.update-requirements', $order->id) }}" method="POST" class="mt-5 space-y-4">
+                                    @csrf
+                                    <div>
+                                        <label class="mb-2 block text-sm font-medium text-slate-700">需求描述</label>
+                                        <textarea name="requirements" rows="6" class="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary" required>{{ $requirementContent }}</textarea>
+                                    </div>
+                                    <div>
+                                        <label class="mb-2 block text-sm font-medium text-slate-700">补充说明（可选）</label>
+                                        <textarea name="customer_notes" rows="3" class="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary">{{ $order->customer_notes }}</textarea>
+                                    </div>
+                                    <div class="flex items-center justify-between gap-4">
+                                        <p class="text-sm text-slate-500">修改后会立即更新当前订单内容。</p>
+                                        <button type="submit" class="inline-flex items-center justify-center rounded-2xl bg-primary px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-600">保存修改</button>
+                                    </div>
+                                </form>
+                            </div>
+                        @endif
                     </div>
                 </section>
 
@@ -124,6 +161,19 @@
                             </p>
                         </div>
                     </div>
+
+                    @if($order->status === 'pending_deposit')
+                        <div class="rounded-3xl border border-amber-200 bg-amber-50 p-5">
+                            <h2 class="text-lg font-bold text-slate-950">支付启动金</h2>
+                            <p class="mt-2 text-sm text-slate-600">支付启动金后，订单将正式进入制作流程，后续将不能继续修改需求。</p>
+                            <form action="{{ route('orders.pay-deposit', $order->id) }}" method="POST" class="mt-4">
+                                @csrf
+                                <button type="submit" class="inline-flex items-center justify-center rounded-2xl bg-primary px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-600">
+                                    支付启动金 ¥{{ number_format((float) $order->deposit_amount, 2) }}
+                                </button>
+                            </form>
+                        </div>
+                    @endif
 
                     <div class="space-y-3">
                         <h2 class="text-lg font-bold text-slate-950">商品信息</h2>

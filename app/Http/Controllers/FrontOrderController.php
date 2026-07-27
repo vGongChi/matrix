@@ -67,4 +67,60 @@ class FrontOrderController extends Controller
 
         return view('order.show', compact('order'));
     }
+
+    public function updateRequirements(Request $request, $id)
+    {
+        $order = Order::where('user_id', Auth::id())
+            ->findOrFail($id);
+
+        if (! empty($order->deposit_paid) || $order->status !== 'pending_deposit') {
+            return redirect()->route('orders.show', $order->id)
+                ->with('error', '启动金已支付后，需求信息将无法继续修改。');
+        }
+
+        $data = $request->validate([
+            'requirements' => ['required', 'string', 'max:4000'],
+            'customer_notes' => ['nullable', 'string', 'max:4000'],
+        ]);
+
+        $requirements = trim($data['requirements']);
+
+        $order->update([
+            'requirements' => ! empty($requirements)
+                ? [[
+                    'type' => 'description',
+                    'content' => $requirements,
+                ]]
+                : [],
+            'customer_notes' => $data['customer_notes'] ?? null,
+        ]);
+
+        return redirect()->route('orders.show', $order->id)
+            ->with('success', '需求信息已更新。');
+    }
+
+    public function payDeposit($id)
+    {
+        $order = Order::where('user_id', Auth::id())
+            ->findOrFail($id);
+
+        if (! empty($order->deposit_paid)) {
+            return redirect()->route('orders.show', $order->id)
+                ->with('success', '启动金已经支付完成。');
+        }
+
+        if ($order->status !== 'pending_deposit') {
+            return redirect()->route('orders.show', $order->id)
+                ->with('error', '当前订单状态不支持支付启动金。');
+        }
+
+        $order->update([
+            'deposit_paid' => true,
+            'deposit_paid_at' => now(),
+            'status' => 'processing',
+        ]);
+
+        return redirect()->route('orders.show', $order->id)
+            ->with('success', '启动金支付成功，订单已进入制作流程。');
+    }
 }

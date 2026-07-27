@@ -9,20 +9,70 @@
       </div>
     </div>
 
-    <nav class="hidden lg:flex items-center gap-10">
-      <a href="{{ url('/') }}" class="text-sm font-medium hover:text-primary transition-colors">首页</a>
-      <a href="{{ url('/#services') }}" class="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">服务</a>
-      <a href="{{ url('/#cases') }}" class="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">案例</a>
-      <a href="{{ url('/#process') }}" class="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">流程</a>
-      <a href="{{ url('/team') }}" class="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">团队</a>
-      <a href="{{ url('/material') }}" class="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">开源中心</a>
-      <a href="{{ url('/products') }}" class="text-sm font-semibold text-primary hover:text-primary/70 transition-colors">AI极速工坊</a>
+    <nav class="hidden lg:flex items-center gap-2">
+      @php
+        $currentPath = request()->path();
+        $navItems = [
+          ['label' => '首页', 'url' => url('/'), 'active' => $currentPath === '' || $currentPath === '/'],
+          ['label' => '服务', 'url' => url('/#services'), 'active' => false],
+          ['label' => '案例', 'url' => url('/#cases'), 'active' => false],
+          ['label' => '流程', 'url' => url('/#process'), 'active' => false],
+          ['label' => '团队', 'url' => url('/team'), 'active' => $currentPath === 'team'],
+          ['label' => '开源中心', 'url' => url('/material'), 'active' => $currentPath === 'material'],
+          ['label' => 'AI极速工坊', 'url' => url('/products'), 'active' => $currentPath === 'products'],
+        ];
+      @endphp
+      @foreach($navItems as $item)
+        <a href="{{ $item['url'] }}" class="rounded-full px-4 py-2 text-sm font-medium transition-all {{ $item['active'] ? 'bg-primary text-white shadow-sm' : 'text-muted-foreground hover:bg-slate-100 hover:text-primary' }}">
+          @if($item['label'] === 'AI极速工坊')
+            <span class="inline-flex items-center gap-2">
+              <span>{{ $item['label'] }}</span>
+              <span class="inline-flex items-center rounded-full bg-red-500 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.18em] text-white">HOT</span>
+            </span>
+          @else
+            {{ $item['label'] }}
+          @endif
+        </a>
+      @endforeach
     </nav>
 
     @guest
-        <a href="javascript:void(0)" data-open-auth-modal="1" class="bg-primary text-primary-foreground px-6 py-2.5 rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity">登录</a>
+        <a href="javascript:void(0)" data-open-auth-modal="1" class="inline-flex items-center rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:translate-y-[-1px] hover:opacity-90">登录</a>
     @else
-        <a href="{{ route('orders.index') }}" class="bg-primary text-primary-foreground px-6 py-2.5 rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity">控制台</a>
+        @if(request()->routeIs('profile.*'))
+            <form action="{{ route('auth.logout') }}" method="POST" class="inline-flex">
+                @csrf
+                <button type="submit" class="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-primary hover:text-primary">
+                    <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-slate-900 text-[11px] font-bold text-white">↺</span>
+                    退出登录
+                </button>
+            </form>
+        @else
+            <a href="{{ request()->routeIs('orders.*') ? route('profile.edit') : route('orders.index') }}" class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/90 px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm backdrop-blur transition hover:border-primary hover:text-primary">
+                @php
+                    $avatarUrl = '';
+                    $userAvatar = Auth::user()->avatar ?? '';
+                    if (!empty($userAvatar)) {
+                        if (strpos($userAvatar, 'http://') === 0 || strpos($userAvatar, 'https://') === 0) {
+                            $avatarUrl = $userAvatar;
+                        } else {
+                            $avatarUrl = asset('storage/' . $userAvatar);
+                        }
+                    }
+                @endphp
+                @if($avatarUrl)
+                    <img src="{{ $avatarUrl }}" alt="用户头像" class="h-8 w-8 rounded-full object-cover ring-2 ring-primary/10">
+                @else
+                    <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-primary to-sky-400 text-xs font-bold text-white">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                    </span>
+                @endif
+                <span class="hidden sm:block">{{ request()->routeIs('orders.*') ? '个人中心' : '控制台' }}</span>
+            </a>
+        @endif
     @endguest
 </header>
 
@@ -262,9 +312,10 @@ section[id] {
           });
 
           const data = await res.json();
-          if (res.ok && data.redirect) {
-              window.location.href = data.redirect;
-              return;
+          if (res.ok ) {
+            //刷新页面
+            window.location.reload();
+            return;
           }
 
           showAuthFeedback(data.message || '注册失败', true);
@@ -308,8 +359,9 @@ section[id] {
           });
 
           const data = await res.json();
-          if (res.ok && data.redirect) {
-              window.location.href = data.redirect;
+          if (res.ok ) {
+            //刷新页面
+            window.location.reload();
               return;
           }
 

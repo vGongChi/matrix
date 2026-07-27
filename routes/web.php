@@ -37,5 +37,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/orders', [FrontOrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/create', [FrontOrderController::class, 'create'])->name('orders.create');
     Route::post('/orders', [FrontOrderController::class, 'store'])->name('orders.store');
+    Route::post('/orders/{id}/requirements', [FrontOrderController::class, 'updateRequirements'])->name('orders.update-requirements');
+    Route::post('/orders/{id}/pay-deposit', [FrontOrderController::class, 'payDeposit'])->name('orders.pay-deposit');
     Route::get('/orders/{id}', [FrontOrderController::class, 'show'])->name('orders.show');
+
+    Route::get('/profile', [FrontAuthController::class, 'profile'])->name('profile.edit');
+    Route::post('/profile', [FrontAuthController::class, 'updateProfile'])->name('profile.update');
+    Route::post('/auth/logout', [FrontAuthController::class, 'logout'])->name('auth.logout');
 });

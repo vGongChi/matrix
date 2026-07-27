@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class FrontAuthController extends Controller
@@ -111,10 +112,45 @@ class FrontAuthController extends Controller
         ], '登录成功');
     }
 
-    public function logout()
+    public function profile()
+    {
+        $user = Auth::user();
+
+        return view('profile.edit', compact('user'));
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $user = Auth::user();
+
+        $data = $request->validate([
+            'name' => ['nullable', 'string', 'max:191'],
+            'avatar' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
+            'phone' => ['nullable', 'string', 'max:20'],
+        ]);
+
+        $avatarPath = $user->avatar;
+
+        if ($request->hasFile('avatar')) {
+            $avatarPath = $request->file('avatar')->store('avatars', 'public');
+        }
+
+        $user->fill([
+            'name' => $data['name'] ?? $user->name,
+            'avatar' => $avatarPath,
+            'phone' => $data['phone'] ?? $user->phone,
+        ]);
+        $user->save();
+
+        return redirect()->route('profile.edit')->with('success', '资料更新成功。');
+    }
+
+    public function logout(Request $request)
     {
         Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
-        return redirect()->route('products.index');
+        return redirect('/');
     }
 }
