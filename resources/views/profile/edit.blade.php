@@ -24,7 +24,7 @@
                     </div>
                 @endif
 
-                <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data" class="mt-8 space-y-6">
+                <form id="profile-form" action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data" class="mt-8 space-y-6">
                     @csrf
                     <div class="grid gap-6 md:grid-cols-2">
                         <div>
@@ -100,6 +100,7 @@
 @push('scripts')
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
 <script>
+    const profileForm = document.getElementById('profile-form');
     const avatarFileInput = document.getElementById('avatar-file-input');
     const avatarPreview = document.getElementById('avatar-preview');
     const cropperWrapper = document.getElementById('cropper-wrapper');
@@ -107,6 +108,20 @@
     const cropInput = document.getElementById('avatar-crop-data');
     const resetCropBtn = document.getElementById('reset-crop-btn');
     let cropper = null;
+
+    function syncCropData() {
+        if (!cropper || !cropInput) {
+            return;
+        }
+
+        const data = cropper.getData();
+        cropInput.value = JSON.stringify({
+            x: Math.round(data.x),
+            y: Math.round(data.y),
+            width: Math.round(data.width),
+            height: Math.round(data.height),
+        });
+    }
 
     function initCropper(src) {
         if (!cropImage) return;
@@ -139,6 +154,8 @@
                 });
             }
         });
+
+        syncCropData();
     }
 
     if (avatarFileInput) {
@@ -162,6 +179,12 @@
             if (cropper) {
                 cropper.reset();
             }
+        });
+    }
+
+    if (profileForm) {
+        profileForm.addEventListener('submit', function () {
+            syncCropData();
         });
     }
 </script>

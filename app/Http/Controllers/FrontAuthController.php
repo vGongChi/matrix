@@ -127,7 +127,7 @@ class FrontAuthController extends Controller
         $data = $request->validate([
             'name' => ['nullable', 'string', 'max:191'],
             'avatar' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:4096'],
-            'avatar_crop' => ['nullable', 'array'],
+            'avatar_crop' => ['nullable', 'string'],
             'phone' => ['nullable', 'string', 'max:20'],
         ]);
 
@@ -149,8 +149,15 @@ class FrontAuthController extends Controller
                 $constraint->upsize();
             });
 
-            $crop = $data['avatar_crop'] ?? null;
-            if (is_array($crop) && !empty($crop['x']) && !empty($crop['y']) && !empty($crop['width']) && !empty($crop['height'])) {
+            $crop = null;
+            if (! empty($data['avatar_crop'])) {
+                $decodedCrop = json_decode($data['avatar_crop'], true);
+                if (is_array($decodedCrop)) {
+                    $crop = $decodedCrop;
+                }
+            }
+
+            if (is_array($crop) && ! empty($crop['x']) && ! empty($crop['y']) && ! empty($crop['width']) && ! empty($crop['height'])) {
                 $image->crop((int) $crop['width'], (int) $crop['height'], (int) $crop['x'], (int) $crop['y']);
             }
 
