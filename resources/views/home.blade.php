@@ -9,10 +9,10 @@
         <div class="flex flex-col gap-8">
             <div class="flex flex-col gap-4">
                 <h1 class="text-4xl lg:text-6xl font-heading font-bold leading-[1.2]">
-                    {!! optional($hero)->headline ?? '帮 <span class="text-primary">AI 产品</span><br/>快速上线官网与视觉系统' !!}
+                    {!! optional($hero)->headline ?? '15年<span class="text-primary">全栈工程师+</span><br/>资深UI + 专职测试' !!}
                 </h1>
                 <p class="text-lg text-muted-foreground">
-                    {{ optional($hero)->subheadline ?? '设计 + 开发 + 动效一站式完成，最快 3 天交付' }}
+                    {{ optional($hero)->subheadline ?? '一个“铁三角”整编开发组，交付有质感、跑得稳的Web应用' }}
                 </p>
             </div>
 
