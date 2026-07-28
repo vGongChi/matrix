@@ -9,7 +9,7 @@
         <div class="flex flex-col gap-8">
             <div class="flex flex-col gap-4">
                 <h1 class="text-4xl lg:text-6xl font-heading font-bold leading-[1.2]">
-                    {!! optional($hero)->headline ?? '15年<span class="text-primary">全栈工程师+</span><br/>资深UI + 专职测试' !!}
+                    {!! optional($hero)->headline ?? '15年<span class="text-primary">全栈工程师+</span><br/>资深设计师 + 专职测试人员' !!}
                 </h1>
                 <p class="text-lg text-muted-foreground">
                     {{ optional($hero)->subheadline ?? '一个“铁三角”整编开发组，交付有质感、跑得稳的Web应用' }}
